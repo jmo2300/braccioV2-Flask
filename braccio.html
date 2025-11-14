@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Braccio Controller</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+  }
+
+  #moveForm {
+    padding: 20px;
+  }
+
+  h1 {
+    color: #333;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    color: #555;
+    margin-top: 30px;
+    margin-bottom: 15px;
+  }
+
+  .slider-group {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .servo-label {
+    font-weight: bold;
+    font-size: 1.1em;
+  }
+
+  .value-display {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #AA0404;
+  }
+
+  .braccio-slider {
+    width: 100%;
+    height: 25px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.85;
+    transition: opacity .2s;
+    border-radius: 5px;
+  }
+
+  .braccio-slider:hover {
+    opacity: 1;
+  }
+
+  .braccio-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #AA0404;
+    cursor: pointer;
+  }
+
+  .braccio-slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #AA0404;
+    cursor: pointer;
+    border: none;
+  }
+
+  button {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2em;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.2s;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+  /* Preset knoppen sectie */
+  .preset-section {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-top: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .preset-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .preset-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .preset-btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .save-btn {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .save-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .load-btn {
+    background-color: #ffc107;
+    color: #333;
+  }
+
+  .load-btn:hover {
+    background-color: #e0a800;
+  }
+
+  .load-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .preset-info {
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #666;
+    min-height: 40px;
+  }
+
+  .preset-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .preset-value {
+    background-color: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+  }
+</style>
+</head>
+<body>
+<div id="moveForm">
+  <h1>Braccio Servo Controller</h1>
+
+  <!-- Base: 0° - 180° | Start: 90° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Base (0° - 180°):</span>
+      <span class="value-display" id="base_value">90</span>
+    </div>
+    <input type="range" id="base" name="base" min="0" max="180" value="90" oninput="updateValue('base')" class="braccio-slider" />
+  </div>
+
+  <!-- Shoulder: 15° - 165° | Start: 90° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Shoulder (15° - 165°):</span>
+      <span class="value-display" id="shoulder_value">90</span>
+    </div>
+    <input type="range" id="shoulder" name="shoulder" min="15" max="165" value="90" oninput="updateValue('shoulder')" class="braccio-slider" />
+  </div>
+
+  <!-- Elbow: 0° - 180° | Start: 90° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Elbow (0° - 180°):</span>
+      <span class="value-display" id="elbow_value">90</span>
+    </div>
+    <input type="range" id="elbow" name="elbow" min="0" max="180" value="90" oninput="updateValue('elbow')" class="braccio-slider" />
+  </div>
+
+  <!-- Wrist Vertical: 0° - 180° | Start: 90° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Wrist Vertical (0° - 180°):</span>
+      <span class="value-display" id="wrist_ver_value">90</span>
+    </div>
+    <input type="range" id="wrist_ver" name="wrist_ver" min="0" max="180" value="90" oninput="updateValue('wrist_ver')" class="braccio-slider" />
+  </div>
+
+  <!-- Wrist Rotation: 0° - 180° | Start: 90° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Wrist Rotate (0° - 180°):</span>
+      <span class="value-display" id="wrist_rot_value">90</span>
+    </div>
+    <input type="range" id="wrist_rot" name="wrist_rot" min="0" max="180" value="90" oninput="updateValue('wrist_rot')" class="braccio-slider" />
+  </div>
+
+  <!-- Gripper: 10° - 73° | Start: 40° -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <span class="servo-label">Gripper (10° - 73°):</span>
+      <span class="value-display" id="gripper_value">40</span>
+    </div>
+    <input type="range" id="gripper" name="gripper" min="10" max="73" value="40" oninput="updateValue('gripper')" class="braccio-slider" />
+  </div>
+
+  <button type="button" onclick="sendMove()">MOVE BRACCIO</button>
+
+  <!-- Preset Posities Sectie -->
+  <div class="preset-section">
+    <h2>Opgeslagen Posities</h2>
+    <div class="preset-grid">
+      <!-- Preset 1 -->
+      <div class="preset-item">
+        <div class="preset-buttons">
+          <button class="preset-btn save-btn" onclick="savePreset(1)">Bewaar Positie 1</button>
+          <button class="preset-btn load-btn" id="load1" onclick="loadPreset(1)" disabled>Laad</button>
+        </div>
+        <div class="preset-info" id="info1">Nog geen positie opgeslagen</div>
+      </div>
+
+      <!-- Preset 2 -->
+      <div class="preset-item">
+        <div class="preset-buttons">
+          <button class="preset-btn save-btn" onclick="savePreset(2)">Bewaar Positie 2</button>
+          <button class="preset-btn load-btn" id="load2" onclick="loadPreset(2)" disabled>Laad</button>
+        </div>
+        <div class="preset-info" id="info2">Nog geen positie opgeslagen</div>
+      </div>
+
+      <!-- Preset 3 -->
+      <div class="preset-item">
+        <div class="preset-buttons">
+          <button class="preset-btn save-btn" onclick="savePreset(3)">Bewaar Positie 3</button>
+          <button class="preset-btn load-btn" id="load3" onclick="loadPreset(3)" disabled>Laad</button>
+        </div>
+        <div class="preset-info" id="info3">Nog geen positie opgeslagen</div>
+      </div>
+
+      <!-- Preset 4 -->
+      <div class="preset-item">
+        <div class="preset-buttons">
+          <button class="preset-btn save-btn" onclick="savePreset(4)">Bewaar Positie 4</button>
+          <button class="preset-btn load-btn" id="load4" onclick="loadPreset(4)" disabled>Laad</button>
+        </div>
+        <div class="preset-info" id="info4">Nog geen positie opgeslagen</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Object om presets op te slaan
+  const presets = {
+    1: null,
+    2: null,
+    3: null,
+    4: null
+  };
+
+  function updateValue(id) {
+    const slider = document.getElementById(id);
+    const display = document.getElementById(id + '_value');
+    display.textContent = slider.value;
+  }
+
+  function getCurrentValues() {
+    return {
+      base: document.getElementById('base').value,
+      shoulder: document.getElementById('shoulder').value,
+      elbow: document.getElementById('elbow').value,
+      wrist_ver: document.getElementById('wrist_ver').value,
+      wrist_rot: document.getElementById('wrist_rot').value,
+      gripper: document.getElementById('gripper').value
+    };
+  }
+
+  function setSliderValues(values) {
+    document.getElementById('base').value = values.base;
+    document.getElementById('shoulder').value = values.shoulder;
+    document.getElementById('elbow').value = values.elbow;
+    document.getElementById('wrist_ver').value = values.wrist_ver;
+    document.getElementById('wrist_rot').value = values.wrist_rot;
+    document.getElementById('gripper').value = values.gripper;
+
+    // Update de displays
+    updateValue('base');
+    updateValue('shoulder');
+    updateValue('elbow');
+    updateValue('wrist_ver');
+    updateValue('wrist_rot');
+    updateValue('gripper');
+  }
+
+  function savePreset(presetNumber) {
+    const values = getCurrentValues();
+    presets[presetNumber] = values;
+
+    // Update de info display
+    const infoDiv = document.getElementById('info' + presetNumber);
+    infoDiv.innerHTML = `
+      <strong>Opgeslagen:</strong>
+      <div class="preset-values">
+        <span class="preset-value">B:${values.base}°</span>
+        <span class="preset-value">S:${values.shoulder}°</span>
+        <span class="preset-value">E:${values.elbow}°</span>
+        <span class="preset-value">WV:${values.wrist_ver}°</span>
+        <span class="preset-value">WR:${values.wrist_rot}°</span>
+        <span class="preset-value">G:${values.gripper}°</span>
+      </div>
+    `;
+
+    // Enable de load knop
+    document.getElementById('load' + presetNumber).disabled = false;
+
+    console.log('Preset ' + presetNumber + ' opgeslagen:', values);
+  }
+
+  function loadPreset(presetNumber) {
+    const values = presets[presetNumber];
+    if (values) {
+      setSliderValues(values);
+      console.log('Preset ' + presetNumber + ' geladen:', values);
+    }
+  }
+
+  function sendMove() {
+    const data = getCurrentValues();
+
+    fetch('/move', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    }).then(response => {
+      if (response.status === 204) {
+        console.log('Move command sent');
+      } else {
+        console.error('Failed to send move command');
+        console.error('Fout: Het verzenden van het commando naar de Flask-server is mislukt.');
+      }
+    });
+  }
+</script>
+</body>
+</html>
